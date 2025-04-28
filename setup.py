@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="unofficial-dehashed-api",
+    name="dehashed-api",
     version="0.1.0",
     author="SUT0L",
     author_email="your.email@example.com",
