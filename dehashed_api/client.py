@@ -453,8 +453,9 @@ class DehashedClient:
         wildcard: bool = False,
         deduplicate: bool = True,
         custom_headers: Optional[Dict[str, str]] = None,
-        http_client: Optional[SyncHTTPClient] = None
-    ) -> Iterator[DehashedResult]:
+        http_client: Optional[SyncHTTPClient] = None,
+        as_object: bool = True
+    ) -> Iterator[DehashedResult] | Iterator[Dict[str, Any]]:
         """
         Perform a paginated search and yield results.
         The Web-API only supports up to a maximum of 499 pages. If you need more than that, I suggest you support DeHashed by using their official API.
@@ -468,13 +469,14 @@ class DehashedClient:
             deduplicate: Whether to let DeHashed deduplicate the results
             custom_headers: Custom headers
             http_client: HTTP client
+            as_object: Return data as a SearchResponse object instead of dict
             
         Yields:
-            Individual DehashedResult objects
+            Individual DehashedResult objects or raw result dictionaries
         """
         page = 1
         while page <= max_pages:
-            response = cast(SearchResponse, self.search(
+            response = self.search(
                 search_type=search_type,
                 query=query,
                 page=page,
@@ -483,18 +485,30 @@ class DehashedClient:
                 deduplicate=deduplicate,
                 custom_headers=custom_headers,
                 http_client=http_client,
-                as_object=True
-            ))
+                as_object=as_object
+            )
             
-            if not response.results:
-                break
-                
-            for result in response.results:
-                yield result
-                
-            if not response.next_page:
-                break
-                
+            if as_object:
+                response_obj = cast(SearchResponse, response)
+                if not response_obj.results:
+                    break
+                    
+                for result in response_obj.results:
+                    yield result
+                    
+                if not response_obj.next_page:
+                    break
+            else:
+                results = response.get('results', [])
+                if not results:
+                    break
+                    
+                for result in results:
+                    yield result
+                    
+                if not response.get('next_page', False):
+                    break
+                    
             page += 1
 
     @asynccontextmanager
@@ -667,8 +681,9 @@ class DehashedClient:
         wildcard: bool = False,
         deduplicate: bool = True,
         custom_headers: Optional[Dict[str, str]] = None,
-        http_client: Optional[AsyncHTTPClient | aiohttp.ClientSession] = None
-    ) -> AsyncIterator[DehashedResult]:
+        http_client: Optional[AsyncHTTPClient | aiohttp.ClientSession] = None,
+        as_object: bool = True
+    ) -> AsyncIterator[DehashedResult] | AsyncIterator[Dict[str, Any]]:
         """
         Perform an async paginated search and yield results.
         
@@ -681,13 +696,14 @@ class DehashedClient:
             deduplicate: Whether to let DeHashed deduplicate the results
             custom_headers: Custom headers
             http_client: HTTP client
+            as_object: Return data as a SearchResponse object instead of dict
             
         Yields:
-            Individual DehashedResult objects
+            Individual DehashedResult objects or raw result dictionaries
         """
         page = 1
         while page <= max_pages:
-            response = cast(SearchResponse, await self.search_async(
+            response = await self.search_async(
                 search_type=search_type,
                 query=query,
                 page=page,
@@ -696,18 +712,30 @@ class DehashedClient:
                 deduplicate=deduplicate,
                 custom_headers=custom_headers,
                 http_client=http_client,
-                as_object=True
-            ))
+                as_object=as_object
+            )
             
-            if not response.results:
-                break
-                
-            for result in response.results:
-                yield result
-                
-            if not response.next_page:
-                break
-                
+            if as_object:
+                response_obj = cast(SearchResponse, response)
+                if not response_obj.results:
+                    break
+                    
+                for result in response_obj.results:
+                    yield result
+                    
+                if not response_obj.next_page:
+                    break
+            else:
+                results = response.get('results', [])
+                if not results:
+                    break
+                    
+                for result in results:
+                    yield result
+                    
+                if not response.get('next_page', False):
+                    break
+                    
             page += 1
     
     async def get_all_results_async(
@@ -719,8 +747,9 @@ class DehashedClient:
         wildcard: bool = False,
         deduplicate: bool = True,
         custom_headers: Optional[Dict[str, str]] = None,
-        http_client: Optional[AsyncHTTPClient | aiohttp.ClientSession] = None
-    ) -> List[DehashedResult]:
+        http_client: Optional[AsyncHTTPClient | aiohttp.ClientSession] = None,
+        as_object: bool = True
+    ) -> List[DehashedResult] | List[Dict[str, Any]]:
         """
         Get all results from a paginated search.
         
@@ -733,9 +762,10 @@ class DehashedClient:
             deduplicate: Whether to let DeHashed deduplicate the results
             custom_headers: Custom headers
             http_client: HTTP client
+            as_object: Return data as a SearchResponse object instead of dict
             
         Returns:
-            A list of all DehashedResult objects
+            A list of all DehashedResult objects or raw result dictionaries
         """
         results = []
         async for result in self.paginate_search_async(
@@ -746,7 +776,8 @@ class DehashedClient:
             wildcard=wildcard,
             deduplicate=deduplicate,
             custom_headers=custom_headers,
-            http_client=http_client
+            http_client=http_client,
+            as_object=as_object
         ):
             results.append(result)
         return results
@@ -760,8 +791,9 @@ class DehashedClient:
         wildcard: bool = False,
         deduplicate: bool = True,
         custom_headers: Optional[Dict[str, str]] = None,
-        http_client: Optional[SyncHTTPClient] = None
-    ) -> List[DehashedResult]:
+        http_client: Optional[SyncHTTPClient] = None,
+        as_object: bool = True
+    ) -> List[DehashedResult] | List[Dict[str, Any]]:
         """
         Get all results from a paginated search synchronously.
         
@@ -774,9 +806,10 @@ class DehashedClient:
             deduplicate: Whether to let DeHashed deduplicate the results
             custom_headers: Custom headers
             http_client: HTTP client
+            as_object: Return data as a SearchResponse object instead of dict
             
         Returns:
-            A list of all DehashedResult objects
+            A list of all DehashedResult objects or raw result dictionaries
         """
         return list(self.paginate_search(
             search_type=search_type,
@@ -786,5 +819,6 @@ class DehashedClient:
             wildcard=wildcard,
             deduplicate=deduplicate,
             custom_headers=custom_headers,
-            http_client=http_client
+            http_client=http_client,
+            as_object=as_object
         ))
