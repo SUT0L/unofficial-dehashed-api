@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dehashed-api"
+version = "0.2.0"
+description = "Unofficial Python client for the DeHashed Web-API"
+readme = "README.md"
+authors = [
+    { name = "SUT0L", email = "117520656+SUT0L@users.noreply.github.com" },
+]
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = ["dehashed", "security", "api", "client", "async", "requests", "aiohttp"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "requests>=2.32.3",
+    "aiohttp>=3.11.16",
+    "aiofiles>=24.1.0",
+    "pycryptodome>=3.10.0",
+    "cryptography>=41.0.0",
+]
+
+[project.optional-dependencies]
+sync = [
+    "requests>=2.32.3",
+]
+async = [
+    "aiohttp>=3.11.16",
+    "aiofiles>=24.1.0",
+]
+orjson = ["orjson>=3.10.16"]
+ujson = ["ujson>=5.10.0"]
+
+[project.urls]
+Homepage = "https://github.com/SUT0L/unofficial-dehashed-api/"
+Repository = "https://github.com/SUT0L/unofficial-dehashed-api/"
+
+[tool.setuptools.packages.find]
+exclude = ["examples", "examples.*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -v"
+testpaths = ["tests"]
+python_files = "test_*.py"
+asyncio_mode = "auto"
