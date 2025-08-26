@@ -212,9 +212,14 @@ class Client:
             self.rate.update_from_headers(response.headers)
 
             if response.status_code == 429:
-                self._logger.warning("429 received; backing off %ss", self.rate.reset)
-                time.sleep(self.rate.reset)
+                if self.rate.retry_after is not None:
+                    backoff_time = self.rate.retry_after
+                else:
+                    backoff_time = 40
+                self._logger.warning("429 received; backing off %ss", backoff_time)
+                time.sleep(backoff_time)
                 self.rate.remaining = self.rate.limit
+                self.rate.retry_after = None
                 continue
             elif response.status_code in [401, 403] and self.auto_refresh and retries < max_retries:
                 if self.refresh_token:

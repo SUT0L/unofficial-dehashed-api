@@ -24,13 +24,20 @@ class RateLimiterState:
         self.remaining = 50
         self.reset = 3
         self.reset_at: Optional[datetime] = None
+        self.retry_after: Optional[int] = None
 
     def update_from_headers(self, headers: Dict[str, str]) -> None:
         if 'x-ratelimit-limit' in headers:
             self.limit = int(headers['x-ratelimit-limit'])
         if 'x-ratelimit-remaining' in headers:
             self.remaining = int(headers['x-ratelimit-remaining'])
-        logger.debug("rate-limit update: limit=%s remaining=%s", self.limit, self.remaining)
+        if 'x-ratelimit-reset' in headers:
+            self.reset = int(headers['x-ratelimit-reset'])
+            self.reset_at = datetime.now() + timedelta(seconds=self.reset)
+        if 'retry-after' in headers:
+            self.retry_after = int(headers['retry-after'])
+        logger.debug("rate-limit update: limit=%s remaining=%s reset=%s retry-after=%s", 
+                    self.limit, self.remaining, self.reset, self.retry_after)
 
 def _generate_random_hex(length: int) -> str:
     byte_length = length // 2
