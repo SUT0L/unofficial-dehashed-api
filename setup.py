@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="dehashed-api",
-    version="0.2.0",
+    version="0.2.1",
     author="SUT0L",
     author_email="117520656+SUT0L@users.noreply.github.com",
     description="Unofficial Python client for the DeHashed Web-API",

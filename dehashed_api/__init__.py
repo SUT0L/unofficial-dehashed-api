@@ -15,7 +15,7 @@ from ._core import DehashedAPIError
 from .sync_client import Client
 from .async_client import AsyncClient
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __all__ = [
     "Client",
     "AsyncClient",
